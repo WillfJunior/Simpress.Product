@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  mssql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Simpress@123"
+      MSSQL_PID: Express
+      
+    ports:
+      - "1433:1433"
+   
+
+  simpress.product.api:
+    image: ${DOCKER_REGISTRY-}simpressproductapi
+    build:
+      context: .
+      dockerfile: Simpress.Product.API/Dockerfile
+    environment:
+      DbServer: "mssql-server"
+      DbPort: "1433"
+      DbUser: "sa"
+      Password: "Simpress@123"
+      Database: "Simpress"
+    ports: 
+      - "8090:8090"
