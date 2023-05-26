@@ -20,6 +20,7 @@ namespace Simpress.Product.Test
     public class ProductServiceTest
     {
         Mock<IProductRepository> mockRepository;
+        Mock<ICategoryRepository> mockCategoryRepository;
         Mock<INotificator> mockNotificator;
         Mock<IUnitOfWork> mockUoW;
         private readonly IMapper mockMapper;
@@ -39,7 +40,8 @@ namespace Simpress.Product.Test
             mockRepository = new Mock<IProductRepository>();
             mockNotificator = new Mock<INotificator>();
             mockUoW = new Mock<IUnitOfWork>();
-            
+            mockCategoryRepository = new Mock<ICategoryRepository>();
+
         }
 
         [Test]
@@ -49,23 +51,28 @@ namespace Simpress.Product.Test
 
             //Arrange
             mockUoW.Setup(x => x.ProductRepository).Returns(mockRepository.Object);
+            mockUoW.Setup(x => x.CategoryRepository).Returns(mockCategoryRepository.Object);
 
             var product =
                 new Domain.Entities.Models.Product(1, "Teste", 5, 1);
 
+            var category = new Category(1, "Categoty Teste");
 
+            mockCategoryRepository.Setup(x => x.GetById(1)).Returns(Task.FromResult(category));
 
             mockRepository.Setup(x => x.Add(product)).Returns(Task.FromResult(product));
+            
             var productDto = mockMapper.Map<ProductDto>(product);
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = await service.Add(productDto);
 
 
             //Assert
+            mockCategoryRepository.Verify(x => x.GetById(1), Times.Once());
             mockNotificator.Verify(n => n.GetAllNotifications(), Times.Never());
             Assert.True(result.Success);
 
@@ -80,8 +87,14 @@ namespace Simpress.Product.Test
             //Arrange
             mockUoW.Setup(x => x.ProductRepository).Returns(mockRepository.Object);
 
+            mockUoW.Setup(x => x.CategoryRepository).Returns(mockCategoryRepository.Object);
+
             var product =
                 new Domain.Entities.Models.Product(1, "Tes", 5, 1);
+
+            var category = new Category(1, "Categoty Teste");
+
+            mockCategoryRepository.Setup(x => x.GetById(1)).Returns(Task.FromResult(category));
 
 
 
@@ -90,12 +103,13 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = await service.Add(productDto);
 
 
             //Assert
+            mockCategoryRepository.Verify(x => x.GetById(1), Times.Never());
             mockNotificator.Verify(n => n.GetAllNotifications(), Times.Once());
             Assert.False(result.Success);
 
@@ -110,8 +124,14 @@ namespace Simpress.Product.Test
             //Arrange
             mockUoW.Setup(x => x.ProductRepository).Returns(mockRepository.Object);
 
+            mockUoW.Setup(x => x.CategoryRepository).Returns(mockCategoryRepository.Object);
+
             var product =
                 new Domain.Entities.Models.Product(1, "Teste", 5, 1);
+
+            var category = new Category(1, "Categoty Teste");
+
+            mockCategoryRepository.Setup(x => x.GetById(1)).Returns(Task.FromResult(category));
 
 
 
@@ -121,12 +141,13 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = await service.Update(productDto, 1);
 
 
             //Assert
+            mockCategoryRepository.Verify(x => x.GetById(1), Times.Once());
             mockRepository.Verify(x => x.GetById(1), Times.Once());
             mockRepository.Verify(x => x.Update(product), Times.Once());
             mockNotificator.Verify(n => n.GetAllNotifications(), Times.Never());
@@ -143,8 +164,14 @@ namespace Simpress.Product.Test
             //Arrange
             mockUoW.Setup(x => x.ProductRepository).Returns(mockRepository.Object);
 
+            mockUoW.Setup(x => x.CategoryRepository).Returns(mockCategoryRepository.Object);
+
             var product =
                 new Domain.Entities.Models.Product(1, "Tes", 5, 1);
+
+            var category = new Category(1, "Categoty Teste");
+
+            mockCategoryRepository.Setup(x => x.GetById(1)).Returns(Task.FromResult(category));
 
 
 
@@ -154,12 +181,14 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = await service.Update(productDto, 1);
 
 
             //Assert
+            mockCategoryRepository.Verify(x => x.GetById(1), Times.Never());
+            mockCategoryRepository.Verify(x => x.Update(category), Times.Never());
             mockRepository.Verify(x => x.GetById(1), Times.Once());
             mockRepository.Verify(x => x.Update(product), Times.Never());
             mockNotificator.Verify(n => n.GetAllNotifications(), Times.Once());
@@ -182,11 +211,11 @@ namespace Simpress.Product.Test
             };
 
             mockRepository.Setup(x => x.GetAll()).Returns(Task.FromResult(products));
-            
+
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object,mockUoW.Object,mockMapper,mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = service.GetAll();
 
@@ -214,7 +243,7 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = service.GetById(1);
 
@@ -242,7 +271,7 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = await service.GetById(0);
 
@@ -271,7 +300,7 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = service.Remove(1);
 
@@ -300,7 +329,7 @@ namespace Simpress.Product.Test
 
 
             //Act
-            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object);
+            ProductService service = new ProductService(mockNotificator.Object, mockUoW.Object, mockMapper, mockRepository.Object, mockCategoryRepository.Object);
 
             var result = service.Remove(0);
 

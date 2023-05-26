@@ -13,19 +13,29 @@ namespace Simpress.Product.Application.Services
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IProductRepository _repository;
+        private readonly ICategoryRepository _categoryRepository;
 
         #region Constructor
         public ProductService(INotificator notificator,
             IUnitOfWork uow,
             IMapper mapper,
-            IProductRepository repository) : base(notificator)
+            IProductRepository repository,
+            ICategoryRepository categoryRepository) : base(notificator)
         {
             _uow = uow;
             _mapper = mapper;
             _repository = _uow.ProductRepository;
             _notificator = notificator;
+            _categoryRepository = _uow.CategoryRepository;
         }
         #endregion
+        
+        private async Task<bool> ExistsCategoryAsync(int id)
+        {
+            var category = await _categoryRepository.GetById(id);
+
+            return category != null;
+        }
 
         public async Task<RequestResult> Add(ProductDto entity)
         {
@@ -40,6 +50,10 @@ namespace Simpress.Product.Application.Services
                 };
                 
             }
+
+            var categoryExists = await ExistsCategoryAsync(product.CategoryId);
+
+            if(!categoryExists) return new RequestResult { Success = false, Data = "Category not Found" };
 
             await _repository.Add(product);
 
@@ -99,6 +113,10 @@ namespace Simpress.Product.Application.Services
                 };
 
             }
+
+            var categoryExists = await ExistsCategoryAsync(product.CategoryId);
+
+            if (!categoryExists) return new RequestResult { Success = false, Data = "Category not Found" };
 
             await _repository.Update(product);
 
