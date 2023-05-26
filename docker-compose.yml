@@ -17,11 +17,7 @@ services:
     build:
       context: .
       dockerfile: Simpress.Product.API/Dockerfile
-    environment:
-      DbServer: "mssql-server"
-      DbPort: "1433"
-      DbUser: "sa"
-      Password: "Simpress@123"
-      Database: "Simpress"
-    ports: 
-      - "8090:8090"
+    ports:
+      - "8080:80"
+    depends_on:
+      - mssql-server
