@@ -16,6 +16,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Build
+        run: dotnet publish Simpress.Product.sln -c Release -o out
       - name: Install dependencies
         run: dotnet restore
       - name: Build
